@@ -4,7 +4,9 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { Pool } from 'pg';
 import { randomUUID } from 'crypto';
+import jwt from 'jsonwebtoken';
 import { createPushRoutes } from './pushRoutes.js';
+import { createAuthRoutes } from './auth.routes.js';
 
 // Types
 interface Family {
@@ -170,7 +172,7 @@ const familyMiddleware = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
-export function createApp(pool: Pool) {
+export async function createApp(pool: Pool) {
   const app = express();
 
   // Security middlewares
@@ -214,6 +216,10 @@ export function createApp(pool: Pool) {
   app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
+
+  // ===== Authentication Routes (PUBLIC) =====
+  const authRoutes = await createAuthRoutes(pool);
+  app.use('/auth', authRoutes);
 
   // ===== Push Notifications (AVANT auth middleware) =====
   app.use('/push', createPushRoutes(pool));

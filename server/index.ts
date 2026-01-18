@@ -234,7 +234,7 @@ async function startServer() {
   }
 
   // Create API app
-  const apiApp = createApp(pool);
+  const apiApp = await createApp(pool);
   
   // Create main Express app
   const app = express();
